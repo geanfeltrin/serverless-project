@@ -1,0 +1,33 @@
+service: aws-proxy-apigateway
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+plugins:
+  - serverless-apigateway-service-proxy
+
+custom:
+  apiGatewayServiceProxies:
+    - s3:
+        path: /upload/{fileName}
+        method: post
+        action: PutObject
+        bucket:
+          Ref: S3Bucket
+        key:
+          pathParam: fileName
+        cors: true
+
+resources:
+  Resources:
+    S3Bucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          IgnorePublicAcls: false
+          BlockPublicPolicy: false
+          RestrictPublicBuckets: false
+        

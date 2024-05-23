@@ -1,0 +1,35 @@
+service: aws-pre-signed-s3
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  environment:
+    BUCKET_NAME: pre-signed-s3-bucket
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+        - "s3:GetObject"
+      Resource: "arn:aws:s3:::${self:provider.environment.BUCKET_NAME}/*"
+
+functions:
+  getSignedUrl:
+    handler: index.getSignedUrl
+    events:
+      - http:
+          path: /get-signed-url
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.BUCKET_NAME}
+
+custom:
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
